@@ -1,5 +1,11 @@
 # 🌆 Cidade Neon
 
+## 🎮 Jogue agora
+
+👉 [Abrir Cidade Neon](https://jessicaofarias.github.io/jogo-urbano-js/)
+
+Use um computador com teclado. Mova-se com as setas, corra com Shift + seta e reinicie com R.
+
 Jogo 2D de entrega urbana desenvolvido com HTML, CSS e JavaScript, com gráficos desenhados usando a API Canvas.
 
 O desafio é chegar ao destino indicado em verde, desviando dos obstáculos e tentando concluir a entrega com o menor número de passos.
@@ -71,7 +77,7 @@ Durante o desenvolvimento, pratiquei:
 
 ## 🔜 Próximas melhorias
 
-- [ ] Publicar uma versão jogável online.
+- [x] Publicar uma versão jogável online.
 - [ ] Adicionar uma captura de tela ao README.
 - [ ] Criar uma tela inicial.
 - [ ] Melhorar a adaptação da interface a diferentes telas.
