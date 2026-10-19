@@ -1,0 +1,25 @@
+#gameCanvas {
+  background-color: seagreen;
+  border: 2px solid #00e5ff;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
+  max-width: 95vw;
+  height: auto;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #080b12;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  font-size: 28px;
+  color: #00e5ff;
+}
