@@ -11,6 +11,10 @@ Jogo 2D de entrega urbana desenvolvido com HTML, CSS e JavaScript, com gráficos
 O desafio é chegar ao destino indicado em verde, desviando dos obstáculos e tentando concluir a entrega com o menor número de passos.
 
 > 🚧 Projeto em desenvolvimento, criado como parte do meu aprendizado em programação e desenvolvimento front-end.
+>
+> ## 📸 Prévia do jogo
+
+![Tela do jogo Cidade Neon](imagens/cidade-neon.jpg)
 
 ## 🎮 Funcionalidades
 
