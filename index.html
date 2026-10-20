@@ -3,12 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jogo GTA</title>
+    <title>Cidade Neon | Jessica Farias</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Cidade Neon</h1>
-    <canvas id="gameCanvas" width="800" height="450"></canvas>
+    <section id="telaInicial">
+      <h1>Cidade Neon</h1>
+      <p>
+        Explore as ruas iluminadas e complete sua entrega com o menor número de
+        passos.
+      </p>
+
+      <ul>
+        <li>Use as setas para mover o personagem.</li>
+        <li>Segure Shift enquanto usa uma seta para correr.</li>
+        <li>Chegue ao ponto verde para concluir a entrega.</li>
+        <li>Pressione R para reiniciar a missão.</li>
+        <li>
+          Pressione Esc para voltar ao menu sem perder o progresso da partida.
+        </li>
+      </ul>
+
+      <button id="botaoJogar" type="button">Jogar</button>
+      <p class="autoria">
+        Desenvolvido por Jessica Farias • Projeto em evolução
+      </p>
+    </section>
+    <canvas
+      id="gameCanvas"
+      width="800"
+      height="450"
+      tabindex="0"
+      hidden
+    ></canvas>
     <script src="game.js"></script>
   </body>
 </html>

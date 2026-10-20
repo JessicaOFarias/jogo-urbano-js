@@ -26,6 +26,18 @@ const carroAltura = 35;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const telaInicial = document.getElementById("telaInicial");
+const botaoJogar = document.getElementById("botaoJogar");
+let jogoIniciado = false;
+
+botaoJogar.addEventListener("click", () => {
+  telaInicial.hidden = true;
+  canvas.hidden = false;
+  jogoIniciado = true;
+  canvas.focus();
+  desenhar();
+});
+
 function desenharFaixa(x, largura, cor) {
   ctx.fillStyle = cor;
 
@@ -164,7 +176,7 @@ function desenhar() {
   ctx.fillStyle = "#ffffff";
   ctx.font = "14px Arial";
   ctx.fillText(
-    "Setas: mover | Shift + seta: correr | R: reiniciar missão",
+    "Setas: mover | Shift + seta: correr | R: reiniciar missão  | Esc: menu",
     20,
     canvas.height - 8,
   );
@@ -201,6 +213,18 @@ function desenhar() {
 desenhar();
 
 document.addEventListener("keydown", (e) => {
+  if (jogoIniciado === false) {
+    return;
+  }
+
+  if (e.key === "Escape") {
+    jogoIniciado = false;
+    canvas.hidden = true;
+    telaInicial.hidden = false;
+    botaoJogar.textContent = "Continuar";
+    botaoJogar.focus();
+    return;
+  }
   // Vamos colocar o movimento aqui
 
   if (
@@ -219,7 +243,6 @@ document.addEventListener("keydown", (e) => {
   if (e.shiftKey === true) {
     passo = playerSpeed * 2;
   }
-  console.log("Tecla recebida:", e.key);
 
   if (e.key === "ArrowRight") {
     playerX = playerX + passo;
