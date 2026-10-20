@@ -27,14 +27,20 @@ O desafio é chegar ao destino indicado em verde, desviando dos obstáculos e te
 - Registro da melhor pontuação usando localStorage.
 - Reinício da missão sem apagar o recorde.
 - Cenário com cores neon e elementos desenhados por código.
+- - Tela inicial com apresentação, instruções e autoria.
+- Botão Jogar para iniciar a partida.
+- Retorno ao menu com Esc, mantendo o progresso da partida atual.
+- Botão Continuar para retomar a partida.
+- Navegação por teclado, com foco no botão e no canvas.
 
 ## ⌨️ Controles
 
-| Tecla        | Ação               |
-| ------------ | ------------------ |
-| Setas        | Mover o personagem |
-| Shift + seta | Correr             |
-| R            | Reiniciar a missão |
+| Tecla        | Ação                                |
+| ------------ | ----------------------------------- |
+| Setas        | Mover o personagem                  |
+| Shift + seta | Correr                              |
+| R            | Reiniciar a missão                  |
+| Esc          | Voltar ao menu mantendo o progresso |
 
 Cada movimento válido antes de concluir a entrega conta como um passo.
 Correr aumenta a distância percorrida por movimento.
@@ -82,8 +88,8 @@ Durante o desenvolvimento, pratiquei:
 ## 🔜 Próximas melhorias
 
 - [x] Publicar uma versão jogável online.
-- [ ] Adicionar uma captura de tela ao README.
-- [ ] Criar uma tela inicial.
+- [x] Adicionar uma captura de tela ao README.
+- [x] Criar uma tela inicial.
 - [ ] Melhorar a adaptação da interface a diferentes telas.
 - [ ] Organizar o código para facilitar a manutenção.
 - [ ] Expandir o mapa e adicionar novas missões.
