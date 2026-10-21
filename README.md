@@ -14,7 +14,7 @@ O desafio é retirar uma encomenda no quadrado amarelo da loja e levá-la ao des
 >
 > ## 📸 Prévia do jogo
 
-![Tela do jogo Cidade Neon](imagens/cidade-neon.jpg)
+![Tela do jogo Cidade Neon](imagens/cidade-neon.png)
 
 ## 🎮 Funcionalidades
 
