@@ -8,7 +8,7 @@ Use um computador com teclado. Mova-se com as setas, corra com Shift + seta e re
 
 Jogo 2D de entrega urbana desenvolvido com HTML, CSS e JavaScript, com gráficos desenhados usando a API Canvas.
 
-O desafio é chegar ao destino indicado em verde, desviando dos obstáculos e tentando concluir a entrega com o menor número de passos.
+O desafio é retirar uma encomenda no quadrado amarelo da loja e levá-la ao destino indicado em verde, desviando dos obstáculos e tentando concluir a missão com o menor número de movimentos.
 
 > 🚧 Projeto em desenvolvimento, criado como parte do meu aprendizado em programação e desenvolvimento front-end.
 >
@@ -18,20 +18,27 @@ O desafio é chegar ao destino indicado em verde, desviando dos obstáculos e te
 
 ## 🎮 Funcionalidades
 
-- Movimentação do personagem pelas setas do teclado.
+- Tela inicial com apresentação do jogo, instruções e autoria.
+- Botão Jogar para iniciar a partida.
+- Movimento contínuo ao manter as setas do teclado pressionadas.
+- Movimento diagonal com velocidade ajustada para evitar vantagem sobre o movimento em linha reta.
 - Corrida usando Shift + seta.
 - Limites de movimentação dentro do mapa.
-- Colisão com a loja e o carro estacionado.
-- Missão concluída quando o personagem fica totalmente dentro da área de entrega.
-- Contador de passos durante a missão.
-- Registro da melhor pontuação usando localStorage.
-- Reinício da missão sem apagar o recorde.
-- Cenário com cores neon e elementos desenhados por código.
-- - Tela inicial com apresentação, instruções e autoria.
-- Botão Jogar para iniciar a partida.
+- Colisões com a loja, o carro estacionado e a oficina.
+- Missão em duas etapas: retirar a encomenda na loja e levá-la ao destino.
+- Área amarela de retirada e destino que fica verde após coletar a encomenda.
+- Retirada e entrega realizadas quando o personagem fica totalmente dentro da área correspondente.
+- Encomenda desenhada no personagem durante o transporte.
+- Mensagens indicando a etapa atual e a conclusão da missão.
+- Contador de movimentos durante a missão.
+- Registro do menor número de movimentos usando localStorage.
+- Recorde da missão com retirada separado do recorde da versão anterior.
 - Retorno ao menu com Esc, mantendo o progresso da partida atual.
 - Botão Continuar para retomar a partida.
-- Navegação por teclado, com foco no botão e no canvas.
+- Botão Nova partida e tecla R para reiniciar a missão sem apagar o recorde.
+- Pausa automática quando a janela do jogo perde o foco.
+- Navegação pelos botões com teclado e foco no canvas ao iniciar ou retomar.
+- Cenário neon com loja, oficina, carro e faixas desenhados por código.
 
 ## ⌨️ Controles
 
@@ -42,10 +49,11 @@ O desafio é chegar ao destino indicado em verde, desviando dos obstáculos e te
 | R            | Reiniciar a missão                  |
 | Esc          | Voltar ao menu mantendo o progresso |
 
-Cada movimento válido antes de concluir a entrega conta como um passo.
+O contador aumenta a cada atualização da lógica em que o personagem se desloca, até concluir a entrega. Ele não representa a quantidade de teclas pressionadas.
+
 Correr aumenta a distância percorrida por movimento.
 
-O recorde corresponde ao menor número de passos usados para concluir uma entrega e fica salvo no navegador utilizado.
+O recorde corresponde ao menor número de movimentos usados para concluir a missão com retirada e entrega. Ele fica salvo no navegador utilizado, separado do recorde da versão anterior.
 
 ## 🛠️ Tecnologias
 

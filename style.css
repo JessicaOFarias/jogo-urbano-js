@@ -89,3 +89,31 @@ h1 {
   font-size: 13px;
   color: #b8c4d9;
 }
+
+#botaoNovaPartida {
+  display: block;
+  margin: 12px auto 0;
+  padding: 12px 30px;
+  border: 2px solid #00e5ff;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #00e5ff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#botaoNovaPartida:hover {
+  background-color: #183044;
+}
+
+#botaoNovaPartida:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 4px;
+}
+
+#telaInicial #avisoPausa {
+  color: #ffd54a;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 12px;
+}
