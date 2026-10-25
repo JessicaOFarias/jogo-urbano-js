@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,6 +31,11 @@
         <li>
           Pressione Esc para voltar ao menu sem perder o progresso da partida.
         </li>
+        <li>Cada entrega concluída rende R$ 50 de dinheiro fictício.</li>
+        <li>Após concluir uma entrega, pressione N para iniciar a próxima.</li>
+
+        <li>Você tem 60 segundos para retirar e entregar cada encomenda.</li>
+        <li>Se o tempo acabar, pressione R para tentar novamente.</li>
       </ul>
 
       <button id="botaoJogar" type="button">Jogar</button>
@@ -39,13 +44,54 @@
         Desenvolvido por Jessica Farias • Projeto em evolução
       </p>
     </section>
-    <canvas
-      id="gameCanvas"
-      width="800"
-      height="450"
-      tabindex="0"
-      hidden
-    ></canvas>
+    <section id="areaJogo" hidden aria-label="Partida Cidade Neon">
+      <header class="painel">
+        <div>
+          <span>Destino</span>
+          <strong id="painelDestino">—</strong>
+        </div>
+
+        <div>
+          <span>Saldo fictício</span>
+          <strong id="painelSaldo">R$ 0,00</strong>
+        </div>
+
+        <div>
+          <span>Entregas</span>
+          <strong id="painelEntregas">0</strong>
+        </div>
+
+        <div>
+          <span>Movimentos</span>
+          <strong id="painelMovimentos">0</strong>
+        </div>
+
+        <div>
+          <span>Recorde do destino</span>
+          <strong id="painelRecorde">—</strong>
+        </div>
+
+        <div>
+          <span>Tempo restante</span>
+          <strong id="painelTempo">60 s</strong>
+        </div>
+      </header>
+
+      <p id="painelMissao" role="status"></p>
+
+      <canvas
+        id="gameCanvas"
+        width="800"
+        height="450"
+        tabindex="0"
+        aria-label="Mapa do jogo. Use as setas para mover e Escape para abrir o menu."
+      ></canvas>
+
+      <p class="controles">
+        Setas: mover · Shift: correr · R: repetir missão · N: próxima entrega ·
+        Esc: menu
+      </p>
+    </section>
     <script src="game.js"></script>
   </body>
 </html>

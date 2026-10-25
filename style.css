@@ -117,3 +117,70 @@ h1 {
   font-weight: bold;
   margin-top: 12px;
 }
+
+#areaJogo {
+  width: 800px;
+  max-width: 95vw;
+  font-family: Arial, sans-serif;
+  color: #e6edf7;
+  padding: 24px 0;
+}
+
+.painel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.painel div {
+  background: #10121f;
+  border: 1px solid #283246;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.painel span {
+  display: block;
+  color: #b8c4d9;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.painel strong {
+  display: block;
+  color: #00e5ff;
+  font-size: 17px;
+}
+
+#painelSaldo {
+  color: #4dff88;
+}
+
+#painelMissao {
+  padding: 14px 16px;
+  background: #10121f;
+  border-left: 3px solid #ffd54a;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+#areaJogo #gameCanvas {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+#gameCanvas:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 4px;
+}
+
+.controles {
+  color: #b8c4d9;
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.8;
+}

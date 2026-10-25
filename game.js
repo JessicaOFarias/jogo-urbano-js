@@ -1,3 +1,6 @@
+const duracaoMissao = 60;
+let tempoRestante = duracaoMissao;
+let missaoFalhou = false;
 let playerX = 150;
 let playerY = 100;
 const playerSize = 30;
@@ -5,13 +8,50 @@ const playerSpeed = 5;
 let entregaConcluida = false;
 let temEncomenda = false;
 let passos = 0;
-let recorde = null;
 
-const recordeSalvo = localStorage.getItem("cidadeNeonRecordeRetirada");
+const destinos = [
+  { nome: "Residencial Neon", x: 650, y: 340 },
+  { nome: "Praça Central", x: 350, y: 120 },
+  { nome: "Estação Norte", x: 680, y: 150 },
+];
 
-if (recordeSalvo !== null) {
-  recorde = Number(recordeSalvo);
+const painelTempo = document.getElementById("painelTempo");
+
+let indiceDestino = 0;
+let saldo = 0;
+let entregasRealizadas = 0;
+
+const pagamentoPorEntrega = 50;
+
+function chaveDoRecorde() {
+  return "cidadeNeonRecordeDestinoV1_" + indiceDestino;
 }
+
+function carregarRecorde() {
+  try {
+    const valorSalvo = localStorage.getItem(chaveDoRecorde());
+
+    if (valorSalvo === null) {
+      return null;
+    }
+
+    const valor = Number(valorSalvo);
+
+    return Number.isFinite(valor) && valor >= 0 ? valor : null;
+  } catch {
+    return null;
+  }
+}
+
+function salvarRecorde() {
+  try {
+    localStorage.setItem(chaveDoRecorde(), String(recorde));
+  } catch {
+    // O jogo continua funcionando se o navegador bloquear o armazenamento.
+  }
+}
+
+let recorde = carregarRecorde();
 const predioX = 30;
 const predioY = 2;
 const predioLargura = 100;
@@ -19,8 +59,8 @@ const predioAltura = 20;
 const retiradaX = predioX + predioLargura - 40;
 const retiradaY = predioY + predioAltura + 5;
 const retiradaTamanho = 40;
-const entregaX = 650;
-const entregaY = 340;
+let entregaX = destinos[indiceDestino].x;
+let entregaY = destinos[indiceDestino].y;
 const entregaTamanho = 50;
 const carroX = 480;
 const carroY = 120;
@@ -38,6 +78,59 @@ const telaInicial = document.getElementById("telaInicial");
 const botaoJogar = document.getElementById("botaoJogar");
 const botaoNovaPartida = document.getElementById("botaoNovaPartida");
 const avisoPausa = document.getElementById("avisoPausa");
+const areaJogo = document.getElementById("areaJogo");
+const painelDestino = document.getElementById("painelDestino");
+const painelSaldo = document.getElementById("painelSaldo");
+const painelEntregas = document.getElementById("painelEntregas");
+const painelMovimentos = document.getElementById("painelMovimentos");
+const painelRecorde = document.getElementById("painelRecorde");
+const painelMissao = document.getElementById("painelMissao");
+
+function atualizarPainel() {
+  painelDestino.textContent = destinos[indiceDestino].nome;
+
+  painelSaldo.textContent = saldo.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+
+  painelEntregas.textContent = entregasRealizadas;
+  painelMovimentos.textContent = passos;
+  painelRecorde.textContent = recorde === null ? "—" : recorde;
+
+  painelTempo.textContent = Math.ceil(tempoRestante) + " s";
+  painelTempo.style.color = tempoRestante <= 10 ? "#ff6b81" : "#00e5ff";
+
+  let mensagem;
+
+  if (missaoFalhou) {
+    mensagem =
+      "Tempo esgotado! Pressione R para tentar novamente. Seu saldo foi mantido.";
+  } else if (entregaConcluida) {
+    mensagem =
+      "Entrega concluída! +R$ " +
+      pagamentoPorEntrega +
+      " · Pressione N para a próxima entrega ou R para repetir.";
+  } else if (temEncomenda) {
+    mensagem =
+      "Etapa 2 de 2: leve a encomenda ao ponto verde — " +
+      destinos[indiceDestino].nome +
+      ".";
+  } else {
+    mensagem =
+      "Etapa 1 de 2: entre no quadrado amarelo da loja para retirar a encomenda.";
+  }
+
+  if (painelMissao.textContent !== mensagem) {
+    painelMissao.textContent = mensagem;
+  }
+
+  painelMissao.style.borderLeftColor = missaoFalhou
+    ? "#ff6b81"
+    : entregaConcluida
+      ? "#4dff88"
+      : "#ffd54a";
+}
 let jogoIniciado = false;
 const teclas = {};
 
@@ -52,6 +145,14 @@ botaoJogar.addEventListener("click", () => {
 
 // Botão Nova partida
 botaoNovaPartida.addEventListener("click", () => {
+  saldo = 0;
+  entregasRealizadas = 0;
+  indiceDestino = 0;
+
+  entregaX = destinos[indiceDestino].x;
+  entregaY = destinos[indiceDestino].y;
+  recorde = carregarRecorde();
+
   reiniciarMissao();
   botaoJogar.textContent = "Continuar";
   abrirJogo();
@@ -61,7 +162,7 @@ function abrirJogo() {
   limparTeclas();
   avisoPausa.hidden = true;
   telaInicial.hidden = true;
-  canvas.hidden = false;
+  areaJogo.hidden = false;
   jogoIniciado = true;
   canvas.focus();
   desenhar();
@@ -70,19 +171,40 @@ function abrirJogo() {
 function abrirMenu() {
   limparTeclas();
   jogoIniciado = false;
-  avisoPausa.hidden = false;
-  canvas.hidden = true;
+  areaJogo.hidden = true;
   telaInicial.hidden = false;
+  avisoPausa.hidden = false;
   botaoJogar.textContent = "Continuar";
   botaoNovaPartida.hidden = false;
+  botaoJogar.focus();
 }
 
 function reiniciarMissao() {
   passos = 0;
   entregaConcluida = false;
   temEncomenda = false;
+  missaoFalhou = false;
+  tempoRestante = duracaoMissao;
+
   playerX = 150;
   playerY = 100;
+
+  limparTeclas();
+}
+
+function proximaMissao() {
+  if (entregaConcluida === false) {
+    return;
+  }
+
+  indiceDestino = (indiceDestino + 1) % destinos.length;
+
+  entregaX = destinos[indiceDestino].x;
+  entregaY = destinos[indiceDestino].y;
+  recorde = carregarRecorde();
+
+  limparTeclas();
+  reiniciarMissao();
 }
 
 function desenharRetirada() {
@@ -93,7 +215,7 @@ function desenharRetirada() {
 
     ctx.fillStyle = "#ffd54a";
     ctx.font = "12px Arial";
-    ctx.fillText("RETIRADA", retiradaX + retiradaTamanho + 8, retiradaY + 24);
+    ctx.fillText("RETIRADA", retiradaX + retiradaTamanho + 45, retiradaY + 24);
   }
 }
 
@@ -231,97 +353,41 @@ function desenharOficina() {
 function desenhar() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Pinta o asfalto
+  // Asfalto e calçadas.
   ctx.fillStyle = "#20232e";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Desenha a faixa clara
 
   ctx.fillStyle = "#303b57";
   ctx.fillRect(0, 0, canvas.width, 25);
   ctx.fillRect(0, canvas.height - 25, canvas.width, 25);
 
+  // Iluminação neon.
   ctx.fillStyle = "#00e5ff";
   ctx.shadowColor = "#00e5ff";
   ctx.shadowBlur = 12;
-
   ctx.fillRect(0, 23, canvas.width, 2);
   ctx.fillRect(0, canvas.height - 25, canvas.width, 2);
-
   ctx.shadowBlur = 0;
 
   ctx.fillStyle = "#ff2bd6";
-
   ctx.globalAlpha = 0.2;
   ctx.fillRect(0, canvas.height / 2 - 6, canvas.width, 12);
-
   ctx.globalAlpha = 1;
   ctx.fillRect(0, canvas.height / 2 - 1, canvas.width, 2);
+
+  // As faixas ficam atrás dos objetos e das áreas da missão.
+  desenharFaixa(280, 60, "#e6edf7");
+  desenharFaixa(100, 60, "#ffe08a");
 
   desenharLoja();
   desenharOficina();
   desenharRetirada();
-
-  desenharFaixa(280, 60, "#e6edf7");
-  desenharFaixa(100, 60, "#ffe08a");
-
   desenharDestino();
 
-  if (entregaConcluida === true) {
-    desenharCarro("#4dff88");
-  } else {
-    desenharCarro("#b83dff");
-  }
+  desenharCarro(entregaConcluida ? "#4dff88" : "#b83dff");
   desenharPersonagem("#ffd54a");
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "14px Arial";
-  ctx.fillText(
-    "Setas: mover | Shift + seta: correr | R: reiniciar missão  | Esc: menu",
-    20,
-    canvas.height - 8,
-  );
-
-  ctx.fillStyle = "#10121f";
-  ctx.fillRect(10, canvas.height - 100, 340, 60);
-
-  ctx.fillStyle = "#10121f";
-  ctx.fillRect(600, 40, 180, 65);
-
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "16px Arial";
-  ctx.fillText("Movimentos: " + passos, 610, 63);
-
-  if (recorde === null) {
-    ctx.fillText("Recorde: —", 610, 88);
-  } else {
-    ctx.fillText("Recorde: " + recorde, 610, 88);
-  }
-
-  ctx.font = "20px Arial";
-
-  if (entregaConcluida === true) {
-    ctx.fillStyle = "#4dff88";
-    ctx.fillText("Entrega concluída!", 20, canvas.height - 75);
-    ctx.font = "14px Arial";
-    ctx.fillText(
-      "Pressione R para tentar bater seu recorde",
-      20,
-      canvas.height - 50,
-    );
-  } else if (temEncomenda === false) {
-    ctx.fillStyle = "#ffd54a";
-    ctx.fillText("Retire a encomenda na loja", 20, canvas.height - 75);
-
-    ctx.font = "14px Arial";
-    ctx.fillText("Etapa 1 de 2: retirada", 20, canvas.height - 50);
-  } else {
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("Leve a encomenda ao ponto verde", 20, canvas.height - 75);
-
-    ctx.font = "14px Arial";
-    ctx.fillText("Etapa 2 de 2: entrega", 20, canvas.height - 50);
-  }
+  atualizarPainel();
 }
 
 desenhar();
@@ -360,6 +426,17 @@ function colidiuComObstaculo() {
 }
 
 function atualizar() {
+  if (entregaConcluida || missaoFalhou) {
+    return;
+  }
+
+  tempoRestante = Math.max(0, tempoRestante - intervaloMovimento / 1000);
+
+  if (tempoRestante <= 0) {
+    missaoFalhou = true;
+    limparTeclas();
+    return;
+  }
   const oldX = playerX;
   const oldY = playerY;
   let passo = playerSpeed;
@@ -417,9 +494,13 @@ function atualizar() {
   ) {
     entregaConcluida = true;
     temEncomenda = false;
+
+    saldo = saldo + pagamentoPorEntrega;
+    entregasRealizadas = entregasRealizadas + 1;
+
     if (recorde === null || passos < recorde) {
       recorde = passos;
-      localStorage.setItem("cidadeNeonRecordeRetirada", String(recorde));
+      salvarRecorde();
     }
   }
 }
@@ -448,6 +529,10 @@ document.addEventListener("keydown", (e) => {
 
   if ((e.key === "r" || e.key === "R") && e.repeat === false) {
     reiniciarMissao();
+  }
+
+  if ((e.key === "n" || e.key === "N") && e.repeat === false) {
+    proximaMissao();
   }
 
   desenhar();
