@@ -1,3 +1,128 @@
+const carrosTransito = [
+  {
+    x: 40,
+    inicioX: 40,
+    y: 180,
+    largura: 60,
+    altura: 30,
+    velocidade: 3,
+    cor: "#ff6b81",
+  },
+  {
+    x: 700,
+    inicioX: 700,
+    y: 350,
+    largura: 60,
+    altura: 30,
+    velocidade: -4,
+    cor: "#38bdf8",
+  },
+];
+
+let protecaoRestante = 0;
+let avisoBatidaRestante = 0;
+
+function reiniciarTransito() {
+  for (const carro of carrosTransito) {
+    carro.x = carro.inicioX;
+  }
+
+  protecaoRestante = 0;
+  avisoBatidaRestante = 0;
+}
+
+function moverTransito() {
+  const nivel = calcularNivel();
+
+  // Cada nível acrescenta 15% à velocidade original.
+  const multiplicador = 1 + (nivel - 1) * 0.15;
+
+  for (const carro of carrosTransito) {
+    carro.x = carro.x + carro.velocidade * multiplicador;
+
+    if (carro.velocidade > 0 && carro.x > canvas.width) {
+      carro.x = -carro.largura;
+    } else if (carro.velocidade < 0 && carro.x + carro.largura < 0) {
+      carro.x = canvas.width;
+    }
+  }
+}
+
+function verificarBatida() {
+  if (protecaoRestante > 0) {
+    return false;
+  }
+
+  const bateu = carrosTransito.some((carro) =>
+    colidiuComRetangulo(carro.x, carro.y, carro.largura, carro.altura),
+  );
+
+  if (!bateu) {
+    return false;
+  }
+
+  tempoRestante = Math.max(0, tempoRestante - 5);
+  playerX = 150;
+  playerY = 100;
+
+  protecaoRestante = 2;
+  avisoBatidaRestante = 2;
+  limparTeclas();
+
+  if (tempoRestante <= 0) {
+    missaoFalhou = true;
+  }
+
+  return true;
+}
+
+function desenharTransito() {
+  for (const carro of carrosTransito) {
+    ctx.save();
+
+    // Espelha o desenho quando o carro anda para a esquerda.
+    ctx.translate(
+      carro.x + (carro.velocidade < 0 ? carro.largura : 0),
+      carro.y,
+    );
+    ctx.scale(carro.velocidade < 0 ? -1 : 1, 1);
+
+    ctx.fillStyle = "#080b12";
+    ctx.fillRect(8, -3, 12, 6);
+    ctx.fillRect(40, -3, 12, 6);
+    ctx.fillRect(8, 27, 12, 6);
+    ctx.fillRect(40, 27, 12, 6);
+
+    ctx.fillStyle = carro.cor;
+    ctx.fillRect(0, 0, carro.largura, carro.altura);
+
+    ctx.fillStyle = "#b5efff";
+    ctx.fillRect(12, 5, 9, 20);
+    ctx.fillRect(38, 5, 10, 20);
+
+    ctx.fillStyle = "#fff3b0";
+    ctx.fillRect(56, 3, 4, 6);
+    ctx.fillRect(56, 21, 4, 6);
+
+    ctx.fillStyle = "#ff304f";
+    ctx.fillRect(0, 3, 3, 6);
+    ctx.fillRect(0, 21, 3, 6);
+
+    ctx.restore();
+  }
+}
+
+function desenharProtecao() {
+  if (protecaoRestante <= 0) {
+    return;
+  }
+
+  ctx.save();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(playerX - 5, playerY - 5, playerSize + 10, playerSize + 10);
+  ctx.restore();
+}
 const duracaoMissao = 60;
 let tempoRestante = duracaoMissao;
 let missaoFalhou = false;
@@ -85,6 +210,11 @@ const painelEntregas = document.getElementById("painelEntregas");
 const painelMovimentos = document.getElementById("painelMovimentos");
 const painelRecorde = document.getElementById("painelRecorde");
 const painelMissao = document.getElementById("painelMissao");
+const painelNivel = document.getElementById("painelNivel");
+
+function calcularNivel() {
+  return Math.min(6, 1 + Math.floor(entregasRealizadas / 3));
+}
 
 function atualizarPainel() {
   painelDestino.textContent = destinos[indiceDestino].nome;
@@ -95,6 +225,15 @@ function atualizarPainel() {
   });
 
   painelEntregas.textContent = entregasRealizadas;
+  const nivelAtual = calcularNivel();
+
+  if (nivelAtual === 6) {
+    painelNivel.textContent = "6 · Máximo";
+  } else {
+    const faltam = 3 - (entregasRealizadas % 3);
+
+    painelNivel.textContent = nivelAtual + " · Faltam " + faltam;
+  }
   painelMovimentos.textContent = passos;
   painelRecorde.textContent = recorde === null ? "—" : recorde;
 
@@ -102,15 +241,22 @@ function atualizarPainel() {
   painelTempo.style.color = tempoRestante <= 10 ? "#ff6b81" : "#00e5ff";
 
   let mensagem;
+  let cor = "#ffd54a";
 
   if (missaoFalhou) {
     mensagem =
       "Tempo esgotado! Pressione R para tentar novamente. Seu saldo foi mantido.";
+    cor = "#ff6b81";
   } else if (entregaConcluida) {
     mensagem =
       "Entrega concluída! +R$ " +
       pagamentoPorEntrega +
-      " · Pressione N para a próxima entrega ou R para repetir.";
+      " · N: próxima entrega · R: repetir.";
+    cor = "#4dff88";
+  } else if (avisoBatidaRestante > 0) {
+    mensagem =
+      "Batida! −5 segundos. Você voltou ao início e está protegido por 2 segundos.";
+    cor = "#ff6b81";
   } else if (temEncomenda) {
     mensagem =
       "Etapa 2 de 2: leve a encomenda ao ponto verde — " +
@@ -125,11 +271,7 @@ function atualizarPainel() {
     painelMissao.textContent = mensagem;
   }
 
-  painelMissao.style.borderLeftColor = missaoFalhou
-    ? "#ff6b81"
-    : entregaConcluida
-      ? "#4dff88"
-      : "#ffd54a";
+  painelMissao.style.borderLeftColor = cor;
 }
 let jogoIniciado = false;
 const teclas = {};
@@ -190,6 +332,7 @@ function reiniciarMissao() {
   playerY = 100;
 
   limparTeclas();
+  reiniciarTransito();
 }
 
 function proximaMissao() {
@@ -375,7 +518,6 @@ function desenhar() {
   ctx.globalAlpha = 1;
   ctx.fillRect(0, canvas.height / 2 - 1, canvas.width, 2);
 
-  // As faixas ficam atrás dos objetos e das áreas da missão.
   desenharFaixa(280, 60, "#e6edf7");
   desenharFaixa(100, 60, "#ffe08a");
 
@@ -385,7 +527,12 @@ function desenhar() {
   desenharDestino();
 
   desenharCarro(entregaConcluida ? "#4dff88" : "#b83dff");
+
+  // Carros em movimento, desenhados sobre o asfalto.
+  desenharTransito();
+
   desenharPersonagem("#ffd54a");
+  desenharProtecao();
 
   atualizarPainel();
 }
@@ -430,13 +577,25 @@ function atualizar() {
     return;
   }
 
-  tempoRestante = Math.max(0, tempoRestante - intervaloMovimento / 1000);
+  const segundos = intervaloMovimento / 1000;
+
+  tempoRestante = Math.max(0, tempoRestante - segundos);
+  protecaoRestante = Math.max(0, protecaoRestante - segundos);
+  avisoBatidaRestante = Math.max(0, avisoBatidaRestante - segundos);
 
   if (tempoRestante <= 0) {
     missaoFalhou = true;
     limparTeclas();
     return;
   }
+
+  moverTransito();
+
+  // Detecta também quando um carro atinge o personagem parado.
+  if (verificarBatida()) {
+    return;
+  }
+
   const oldX = playerX;
   const oldY = playerY;
   let passo = playerSpeed;
@@ -455,6 +614,7 @@ function atualizar() {
   if (direcaoX !== 0 && direcaoY !== 0) {
     passo = passo / Math.sqrt(2);
   }
+
   playerX = playerX + direcaoX * passo;
   playerX = Math.max(0, Math.min(playerX, canvas.width - playerSize));
 
@@ -469,13 +629,17 @@ function atualizar() {
     playerY = oldY;
   }
 
-  if (entregaConcluida === false && (playerX !== oldX || playerY !== oldY)) {
+  if (playerX !== oldX || playerY !== oldY) {
     passos = passos + 1;
+  }
+
+  // Detecta quando o personagem se move contra um carro.
+  if (verificarBatida()) {
+    return;
   }
 
   if (
     temEncomenda === false &&
-    entregaConcluida === false &&
     playerX >= retiradaX &&
     playerX + playerSize <= retiradaX + retiradaTamanho &&
     playerY >= retiradaY &&
@@ -485,7 +649,6 @@ function atualizar() {
   }
 
   if (
-    entregaConcluida === false &&
     temEncomenda === true &&
     playerX >= entregaX &&
     playerX + playerSize <= entregaX + entregaTamanho &&

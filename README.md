@@ -59,6 +59,18 @@ Desvie da loja, do carro estacionado e da oficina durante o percurso.
 
 ## ⌨️ Controles
 
+### Trânsito e colisões
+
+- Dois carros em movimento pelo cenário.
+- Colisões com o trânsito acrescentam 5 segundos de penalidade.
+- Proteção temporária de 2 segundos após uma colisão.
+
+### Progressão de níveis
+
+- O nível aumenta a cada 3 entregas concluídas, até o nível 6.
+- A velocidade do trânsito aumenta 15% por nível.
+- O painel mostra quantas entregas faltam para alcançar o próximo nível.
+
 | Tecla           | Ação                                |
 | --------------- | ----------------------------------- |
 | Setas           | Mover o personagem                  |

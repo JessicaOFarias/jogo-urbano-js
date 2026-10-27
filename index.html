@@ -36,6 +36,15 @@
 
         <li>Você tem 60 segundos para retirar e entregar cada encomenda.</li>
         <li>Se o tempo acabar, pressione R para tentar novamente.</li>
+        <li>
+          Desvie do trânsito: uma batida desconta 5 segundos e devolve você ao
+          início, mantendo a encomenda e o saldo. A borda branca indica proteção
+          temporária de 2 segundos.
+        </li>
+        <li>
+          A cada 3 entregas, você sobe de nível. O trânsito fica mais rápido,
+          até o limite do nível 6.
+        </li>
       </ul>
 
       <button id="botaoJogar" type="button">Jogar</button>
@@ -74,6 +83,11 @@
         <div>
           <span>Tempo restante</span>
           <strong id="painelTempo">60 s</strong>
+        </div>
+
+        <div>
+          <span>Nível · Entregas para subir</span>
+          <strong id="painelNivel">1</strong>
         </div>
       </header>
 
