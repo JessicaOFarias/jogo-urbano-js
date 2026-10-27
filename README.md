@@ -14,7 +14,7 @@ Para jogar, utilize um computador com teclado.
 
 ## 📸 Prévia do jogo
 
-![Tela do jogo Cidade Neon](imagens/cidade-neon.png)
+![Tela do jogo Cidade Neon](imagens/cidade-neon.jpg)
 
 ## 📦 Como jogar
 
