@@ -45,6 +45,7 @@
           A cada 3 entregas, você sobe de nível. O trânsito fica mais rápido,
           até o limite do nível 6.
         </li>
+        <li>Complete 10 entregas para vencer a partida.</li>
       </ul>
 
       <button id="botaoJogar" type="button">Jogar</button>
@@ -92,6 +93,9 @@
       </header>
 
       <p id="painelMissao" role="status"></p>
+      <button id="botaoSom" type="button" aria-pressed="true">
+        Som: ligado
+      </button>
 
       <canvas
         id="gameCanvas"
@@ -105,6 +109,21 @@
         Setas: mover · Shift: correr · R: repetir missão · N: próxima entrega ·
         Esc: menu
       </p>
+    </section>
+
+    <section id="telaVitoria" hidden aria-labelledby="tituloVitoria">
+      <p class="selo-vitoria">MISSÃO CUMPRIDA</p>
+      <h1 id="tituloVitoria" tabindex="-1">Você conquistou a Cidade Neon!</h1>
+
+      <p id="mensagemVitoria"></p>
+
+      <div class="resultado-vitoria">
+        <p>Entregas: <strong id="resultadoEntregas"></strong></p>
+        <p>Saldo fictício: <strong id="resultadoSaldo"></strong></p>
+        <p>Nível alcançado: <strong id="resultadoNivel"></strong></p>
+      </div>
+
+      <button id="botaoJogarNovamente" type="button">Jogar novamente</button>
     </section>
     <script src="game.js"></script>
   </body>

@@ -184,3 +184,180 @@ h1 {
   text-align: center;
   line-height: 1.8;
 }
+
+#telaVitoria {
+  box-sizing: border-box;
+  width: 800px;
+  max-width: 95vw;
+  padding: 40px 24px;
+  border: 2px solid #4dff88;
+  border-radius: 16px;
+  background: #10121f;
+  color: #e6edf7;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 0 30px rgba(77, 255, 136, 0.15);
+}
+
+#telaVitoria h1 {
+  color: #4dff88;
+  font-size: clamp(26px, 5vw, 38px);
+}
+
+.selo-vitoria {
+  color: #4dff88;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+
+.resultado-vitoria {
+  margin: 24px auto;
+  padding: 16px;
+  max-width: 360px;
+  border-radius: 10px;
+  background: #080b12;
+  line-height: 1.8;
+}
+
+.resultado-vitoria strong {
+  color: #00e5ff;
+}
+
+#botaoJogarNovamente {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 8px;
+  background: #4dff88;
+  color: #080b12;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#botaoJogarNovamente:hover {
+  background: #9affbc;
+}
+
+#botaoJogarNovamente:focus-visible,
+#tituloVitoria:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 5px;
+}
+
+#botaoSom {
+  margin: 0 0 12px;
+  padding: 10px 16px;
+  border: 1px solid #00e5ff;
+  border-radius: 8px;
+  background: #10121f;
+  color: #00e5ff;
+  font: inherit;
+  cursor: pointer;
+}
+
+#botaoSom:hover {
+  background: #183044;
+}
+
+#botaoSom:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 4px;
+}
+
+#botaoSom[aria-pressed="false"] {
+  border-color: #8892a6;
+  color: #b8c4d9;
+}
+
+/* Partida ajustada ao tamanho da janela */
+body {
+  box-sizing: border-box;
+  min-height: 100dvh;
+  padding: 12px;
+}
+
+#areaJogo {
+  box-sizing: border-box;
+  width: min(1100px, 100%);
+  max-width: 100%;
+  height: calc(100dvh - 24px);
+  padding: 0;
+
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+/* Sete indicadores na mesma linha */
+#areaJogo .painel {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+#areaJogo .painel div {
+  min-width: 0;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+#areaJogo .painel span {
+  margin-bottom: 5px;
+  font-size: 11px;
+}
+
+#areaJogo .painel strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+/* Mensagem e botão mais compactos */
+#areaJogo #painelMissao {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#areaJogo #botaoSom {
+  justify-self: start;
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* O mapa usa apenas o espaço disponível */
+#areaJogo #gameCanvas {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  background: #20232e;
+}
+
+#areaJogo .controles {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Em telas estreitas, os indicadores ficam em duas linhas */
+@media (max-width: 650px) {
+  #areaJogo .painel {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  #areaJogo .painel div {
+    padding: 6px;
+  }
+
+  #areaJogo .painel strong {
+    font-size: 12px;
+  }
+}

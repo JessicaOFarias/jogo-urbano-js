@@ -57,6 +57,21 @@ Desvie da loja, do carro estacionado e da oficina durante o percurso.
 - Navegação pelos botões usando o teclado.
 - Foco no canvas ao iniciar ou retomar a partida.
 
+### Personagem e apresentação visual
+
+- Personagem com boné, uniforme e bolsa que muda de cor ao carregar a encomenda.
+- Animação das pernas ao andar e correr.
+- Loja e oficina com letreiros neon e novos detalhes.
+- Melhorias visuais nos pontos de retirada e entrega.
+- Faixa amarela ajustada para não sobrepor a área de retirada.
+
+### Efeitos sonoros
+
+- Som ao retirar a encomenda.
+- Som ao concluir uma entrega.
+- Som ao colidir com os carros em movimento.
+- Botão para ligar e desligar os sons do jogo.
+
 ## ⌨️ Controles
 
 ### Trânsito e colisões

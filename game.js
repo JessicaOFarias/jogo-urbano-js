@@ -1,3 +1,122 @@
+let somAtivado = true;
+let contextoAudio = null;
+
+const botaoSom = document.getElementById("botaoSom");
+const sonsEmExecucao = new Set();
+
+function prepararAudio() {
+  if (!somAtivado) {
+    return;
+  }
+
+  try {
+    const AudioContextDisponivel =
+      window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextDisponivel) {
+      return;
+    }
+
+    if (!contextoAudio) {
+      contextoAudio = new AudioContextDisponivel();
+    }
+
+    if (contextoAudio.state === "suspended") {
+      contextoAudio.resume().catch(() => {});
+    }
+  } catch {
+    // O jogo continua mesmo se o áudio não estiver disponível.
+  }
+}
+
+function tocarSom(tipo) {
+  if (!somAtivado || !contextoAudio || contextoAudio.state !== "running") {
+    return;
+  }
+
+  const efeitos = {
+    retirada: [
+      { frequencia: 660, inicio: 0, duracao: 0.09 },
+      { frequencia: 880, inicio: 0.1, duracao: 0.13 },
+    ],
+
+    entrega: [
+      { frequencia: 523, inicio: 0, duracao: 0.1 },
+      { frequencia: 659, inicio: 0.12, duracao: 0.1 },
+      { frequencia: 784, inicio: 0.24, duracao: 0.2 },
+    ],
+
+    colisao: [
+      { frequencia: 330, inicio: 0, duracao: 0.15 },
+      { frequencia: 220, inicio: 0.16, duracao: 0.22 },
+    ],
+  };
+
+  const notas = efeitos[tipo];
+
+  if (!notas) {
+    return;
+  }
+
+  const agora = contextoAudio.currentTime;
+
+  for (const nota of notas) {
+    const oscilador = contextoAudio.createOscillator();
+    const volume = contextoAudio.createGain();
+    const inicio = agora + nota.inicio;
+    const fim = inicio + nota.duracao;
+
+    oscilador.type = tipo === "colisao" ? "triangle" : "sine";
+    oscilador.frequency.setValueAtTime(nota.frequencia, inicio);
+
+    volume.gain.setValueAtTime(0, inicio);
+    volume.gain.linearRampToValueAtTime(0.06, inicio + 0.01);
+    volume.gain.linearRampToValueAtTime(0, fim);
+
+    oscilador.connect(volume);
+    volume.connect(contextoAudio.destination);
+
+    sonsEmExecucao.add(oscilador);
+
+    oscilador.onended = () => {
+      oscilador.disconnect();
+      volume.disconnect();
+      sonsEmExecucao.delete(oscilador);
+    };
+
+    oscilador.start(inicio);
+    oscilador.stop(fim);
+  }
+}
+
+function silenciarEfeitos() {
+  for (const oscilador of sonsEmExecucao) {
+    oscilador.stop();
+  }
+
+  sonsEmExecucao.clear();
+}
+
+botaoSom.addEventListener("click", () => {
+  somAtivado = !somAtivado;
+
+  botaoSom.textContent = somAtivado ? "Som: ligado" : "Som: desligado";
+
+  botaoSom.setAttribute("aria-pressed", String(somAtivado));
+
+  if (somAtivado) {
+    prepararAudio();
+  } else {
+    silenciarEfeitos();
+  }
+
+  canvas.focus();
+});
+
+let faseCaminhada = 0;
+let personagemAndando = false;
+const metaEntregas = 10;
+let partidaVencida = false;
 const carrosTransito = [
   {
     x: 40,
@@ -60,6 +179,8 @@ function verificarBatida() {
   if (!bateu) {
     return false;
   }
+
+  tocarSom("colisao");
 
   tempoRestante = Math.max(0, tempoRestante - 5);
   playerX = 150;
@@ -211,6 +332,12 @@ const painelMovimentos = document.getElementById("painelMovimentos");
 const painelRecorde = document.getElementById("painelRecorde");
 const painelMissao = document.getElementById("painelMissao");
 const painelNivel = document.getElementById("painelNivel");
+const telaVitoria = document.getElementById("telaVitoria");
+const tituloVitoria = document.getElementById("tituloVitoria");
+const resultadoEntregas = document.getElementById("resultadoEntregas");
+const resultadoSaldo = document.getElementById("resultadoSaldo");
+const resultadoNivel = document.getElementById("resultadoNivel");
+const botaoJogarNovamente = document.getElementById("botaoJogarNovamente");
 
 function calcularNivel() {
   return Math.min(6, 1 + Math.floor(entregasRealizadas / 3));
@@ -224,7 +351,7 @@ function atualizarPainel() {
     currency: "BRL",
   });
 
-  painelEntregas.textContent = entregasRealizadas;
+  painelEntregas.textContent = entregasRealizadas + " / " + metaEntregas;
   const nivelAtual = calcularNivel();
 
   if (nivelAtual === 6) {
@@ -286,7 +413,8 @@ botaoJogar.addEventListener("click", () => {
 });
 
 // Botão Nova partida
-botaoNovaPartida.addEventListener("click", () => {
+function iniciarNovaPartida() {
+  partidaVencida = false;
   saldo = 0;
   entregasRealizadas = 0;
   indiceDestino = 0;
@@ -295,12 +423,39 @@ botaoNovaPartida.addEventListener("click", () => {
   entregaY = destinos[indiceDestino].y;
   recorde = carregarRecorde();
 
-  reiniciarMissao();
+  telaVitoria.hidden = true;
   botaoJogar.textContent = "Continuar";
+
+  reiniciarMissao();
   abrirJogo();
-});
+}
+
+botaoNovaPartida.addEventListener("click", iniciarNovaPartida);
+botaoJogarNovamente.addEventListener("click", iniciarNovaPartida);
+
+function mostrarVitoria() {
+  partidaVencida = true;
+  jogoIniciado = false;
+  limparTeclas();
+
+  areaJogo.hidden = true;
+  telaInicial.hidden = true;
+  telaVitoria.hidden = false;
+
+  resultadoEntregas.textContent = entregasRealizadas;
+  resultadoSaldo.textContent = saldo.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+  resultadoNivel.textContent = calcularNivel();
+  document.getElementById("mensagemVitoria").textContent =
+    "Você concluiu " + entregasRealizadas + " entregas. Trabalho finalizado!";
+
+  tituloVitoria.focus();
+}
 
 function abrirJogo() {
+  prepararAudio();
   limparTeclas();
   avisoPausa.hidden = true;
   telaInicial.hidden = true;
@@ -311,6 +466,7 @@ function abrirJogo() {
 }
 
 function abrirMenu() {
+  silenciarEfeitos();
   limparTeclas();
   jogoIniciado = false;
   areaJogo.hidden = true;
@@ -351,21 +507,45 @@ function proximaMissao() {
 }
 
 function desenharRetirada() {
-  if (temEncomenda === false && entregaConcluida === false) {
-    ctx.strokeStyle = "#ffd54a";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(retiradaX, retiradaY, retiradaTamanho, retiradaTamanho);
-
-    ctx.fillStyle = "#ffd54a";
-    ctx.font = "12px Arial";
-    ctx.fillText("RETIRADA", retiradaX + retiradaTamanho + 45, retiradaY + 24);
+  if (temEncomenda || entregaConcluida) {
+    return;
   }
+
+  ctx.save();
+
+  ctx.fillStyle = "rgba(255, 213, 74, 0.18)";
+  ctx.fillRect(retiradaX, retiradaY, retiradaTamanho, retiradaTamanho);
+
+  ctx.strokeStyle = "#ffd54a";
+  ctx.lineWidth = 2;
+  ctx.shadowColor = "#ffd54a";
+  ctx.shadowBlur = 8;
+  ctx.strokeRect(retiradaX, retiradaY, retiradaTamanho, retiradaTamanho);
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = "#c58b45";
+  ctx.fillRect(retiradaX + 11, retiradaY + 12, 18, 18);
+
+  ctx.fillStyle = "#f4d19b";
+  ctx.fillRect(retiradaX + 18, retiradaY + 12, 4, 18);
+
+  // Placa ao lado da faixa de pedestres.
+  const placaX = retiradaX + retiradaTamanho + 45;
+
+  ctx.fillStyle = "#10121f";
+  ctx.fillRect(placaX - 5, retiradaY + 8, 88, 24);
+
+  ctx.fillStyle = "#ffd54a";
+  ctx.font = "bold 12px Arial";
+  ctx.fillText("RETIRADA", placaX, retiradaY + 24);
+
+  ctx.restore();
 }
 
-function desenharFaixa(x, largura, cor) {
+function desenharFaixa(x, largura, cor, inicioY = 35) {
   ctx.fillStyle = cor;
 
-  for (let y = 35; y < canvas.height - 25; y = y + 30) {
+  for (let y = inicioY; y < canvas.height - 25; y += 30) {
     ctx.fillRect(x, y, largura, 15);
   }
 }
@@ -397,65 +577,158 @@ function desenharCarro(cor) {
 }
 
 function desenharDestino() {
-  if (entregaConcluida === true) {
-    ctx.strokeStyle = "#8892a6";
-  } else if (temEncomenda === true) {
-    ctx.strokeStyle = "#4dff88";
-  } else {
-    ctx.strokeStyle = "#8892a6";
-  }
+  ctx.save();
 
+  const ativo = temEncomenda && !entregaConcluida;
+  const cor = entregaConcluida ? "#8de8ff" : ativo ? "#4dff88" : "#8892a6";
+
+  ctx.fillStyle = ativo ? "rgba(77, 255, 136, 0.16)" : "rgba(16, 18, 31, 0.75)";
+  ctx.fillRect(entregaX, entregaY, entregaTamanho, entregaTamanho);
+
+  ctx.strokeStyle = cor;
   ctx.lineWidth = 3;
+  ctx.shadowColor = cor;
+  ctx.shadowBlur = ativo ? 12 : 0;
   ctx.strokeRect(entregaX, entregaY, entregaTamanho, entregaTamanho);
-  if (temEncomenda === true && entregaConcluida === false) {
-    ctx.fillStyle = "#c58b45";
-    ctx.fillRect(entregaX + 15, entregaY + 15, 20, 20);
+  ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "#f4d19b";
-    ctx.fillRect(entregaX + 23, entregaY + 15, 4, 20);
+  if (entregaConcluida) {
+    // Símbolo de confirmação.
+    ctx.beginPath();
+    ctx.moveTo(entregaX + 13, entregaY + 25);
+    ctx.lineTo(entregaX + 22, entregaY + 34);
+    ctx.lineTo(entregaX + 38, entregaY + 16);
+    ctx.stroke();
+  } else {
+    // Marca indicando onde parar.
+    ctx.beginPath();
+    ctx.arc(
+      entregaX + entregaTamanho / 2,
+      entregaY + entregaTamanho / 2,
+      12,
+      0,
+      Math.PI * 2,
+    );
+    ctx.stroke();
+
+    ctx.fillStyle = cor;
+    ctx.fillRect(entregaX + 22, entregaY + 22, 6, 6);
   }
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "12px Arial";
-  ctx.fillText("ENTREGA", entregaX, entregaY - 10);
+  ctx.fillStyle = "#10121f";
+  ctx.fillRect(entregaX - 5, entregaY - 25, 90, 20);
+
+  ctx.fillStyle = cor;
+  ctx.font = "bold 11px Arial";
+  ctx.fillText(
+    entregaConcluida ? "ENTREGUE!" : "ENTREGA",
+    entregaX,
+    entregaY - 11,
+  );
+
+  ctx.restore();
 }
 
 function desenharLoja() {
-  ctx.fillStyle = "#181d35";
-  ctx.fillRect(predioX, predioY, predioLargura, predioAltura);
-  ctx.fillStyle = "#00e5ff";
-  ctx.fillRect(
-    predioX + predioLargura - 20,
-    predioY + predioAltura - 10,
-    12,
-    10,
-  );
+  ctx.save();
 
+  ctx.fillStyle = "#101a2c";
+  ctx.fillRect(predioX, predioY, predioLargura, predioAltura);
+
+  // Letreiro.
+  ctx.fillStyle = "#080b12";
+  ctx.fillRect(predioX + 4, predioY + 3, 60, 14);
+
+  ctx.font = "bold 10px Arial";
+  ctx.fillStyle = "#00e5ff";
+  ctx.shadowColor = "#00e5ff";
+  ctx.shadowBlur = 6;
+  ctx.fillText("NEON BOX", predioX + 6, predioY + 14);
+  ctx.shadowBlur = 0;
+
+  // Vitrine.
+  ctx.fillStyle = "#16465c";
+  ctx.fillRect(predioX + 69, predioY + 4, 25, 12);
+
+  ctx.fillStyle = "#8de8ff";
+  ctx.fillRect(predioX + 71, predioY + 5, 2, 9);
+  ctx.fillRect(predioX + 81, predioY + 5, 2, 10);
+
+  // Contorno luminoso.
   ctx.strokeStyle = "#00e5ff";
   ctx.lineWidth = 2;
   ctx.strokeRect(predioX, predioY, predioLargura, predioAltura);
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "12px Arial";
-  ctx.fillText("LOJA", predioX + 8, predioY + 14);
+  ctx.restore();
 }
 
 function desenharPersonagem(cor) {
+  ctx.save();
+  ctx.translate(playerX, playerY);
+
+  // Sombra.
+  ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+  ctx.beginPath();
+  ctx.ellipse(15, 26, 14, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Sapatos e calça animados.
+  const animando =
+    personagemAndando &&
+    jogoIniciado &&
+    !entregaConcluida &&
+    !missaoFalhou &&
+    !partidaVencida;
+
+  const balanco = animando ? Math.round(Math.sin(faseCaminhada) * 2) : 0;
+
+  ctx.fillStyle = "#526078";
+  ctx.fillRect(7, 20, 6, 6 + balanco);
+  ctx.fillRect(17, 20, 6, 6 - balanco);
+
+  ctx.fillStyle = "#080b12";
+  ctx.fillRect(6, 25 + balanco, 7, 3);
+  ctx.fillRect(17, 25 - balanco, 7, 3);
+
+  // Uniforme.
   ctx.fillStyle = cor;
-  ctx.fillRect(playerX, playerY, playerSize, playerSize);
+  ctx.fillRect(5, 12, 20, 11);
 
-  ctx.strokeStyle = "#10121f";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(playerX, playerY, playerSize, playerSize);
+  // Braços.
+  ctx.fillStyle = "#d99b72";
+  ctx.fillRect(2, 14, 4, 8);
+  ctx.fillRect(24, 14, 4, 8);
 
-  if (temEncomenda === true && entregaConcluida === false) {
-    ctx.fillStyle = "#8b5a2b";
-    ctx.fillRect(playerX + 8, playerY + 12, 14, 12);
-  }
+  // Rosto.
+  ctx.fillRect(8, 4, 14, 9);
 
+  // Boné e aba.
+  ctx.fillStyle = "#00e5ff";
+  ctx.fillRect(7, 0, 16, 5);
+  ctx.fillRect(7, 4, 21, 3);
+
+  // Olhos.
   ctx.fillStyle = "#10121f";
-  ctx.fillRect(playerX + 7, playerY + 5, 4, 4);
-  ctx.fillRect(playerX + 19, playerY + 5, 4, 4);
+  ctx.fillRect(11, 8, 2, 2);
+  ctx.fillRect(18, 8, 2, 2);
+
+  // Alça da bolsa.
+  ctx.fillStyle = "#283246";
+  ctx.fillRect(9, 13, 3, 9);
+
+  // Bolsa de entregas.
+  const carregando = temEncomenda && !entregaConcluida;
+  ctx.fillStyle = carregando ? "#c58b45" : "#283246";
+  ctx.fillRect(12, 16, 12, 10);
+
+  ctx.strokeStyle = carregando ? "#ffd54a" : "#8de8ff";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(12.5, 16.5, 11, 9);
+
+  ctx.fillStyle = carregando ? "#f4d19b" : "#00e5ff";
+  ctx.fillRect(17, 17, 3, 8);
+
+  ctx.restore();
 }
 
 function desenharPredio(x, y, largura, altura, corBorda) {
@@ -473,25 +746,44 @@ function desenharPredio(x, y, largura, altura, corBorda) {
 }
 
 function desenharOficina() {
+  ctx.save();
+
   desenharPredio(oficinaX, oficinaY, oficinaLargura, oficinaAltura, "#ff2bd6");
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "14px Arial";
-  ctx.fillText("OFICINA", oficinaX + 10, oficinaY + 25);
+  ctx.fillStyle = "#080b12";
+  ctx.fillRect(oficinaX + 7, oficinaY + 5, oficinaLargura - 14, 18);
 
+  ctx.font = "bold 12px Arial";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#ff8ce8";
+  ctx.shadowColor = "#ff2bd6";
+  ctx.shadowBlur = 6;
+  ctx.fillText("NEON GARAGE", oficinaX + oficinaLargura / 2, oficinaY + 18);
+  ctx.shadowBlur = 0;
+
+  // Janelas laterais.
+  for (const deslocamento of [8, 98]) {
+    ctx.fillStyle = "#16465c";
+    ctx.fillRect(oficinaX + deslocamento, oficinaY + 31, 14, 20);
+
+    ctx.fillStyle = "#8de8ff";
+    ctx.fillRect(oficinaX + deslocamento + 2, oficinaY + 33, 10, 6);
+    ctx.fillRect(oficinaX + deslocamento + 2, oficinaY + 42, 10, 6);
+  }
+
+  // Portão.
   ctx.fillStyle = "#526078";
-  ctx.fillRect(oficinaX + 30, oficinaY + oficinaAltura - 24, 60, 24);
+  ctx.fillRect(oficinaX + 30, oficinaY + 29, 60, 31);
 
   ctx.fillStyle = "#283246";
-
-  for (let linha = 1; linha <= 3; linha = linha + 1) {
-    ctx.fillRect(
-      oficinaX + 30,
-      oficinaY + oficinaAltura - 24 + linha * 6,
-      60,
-      1,
-    );
+  for (let linha = 0; linha < 5; linha++) {
+    ctx.fillRect(oficinaX + 30, oficinaY + 32 + linha * 6, 60, 2);
   }
+
+  ctx.fillStyle = "#ffd54a";
+  ctx.fillRect(oficinaX + 30, oficinaY + 57, 60, 3);
+
+  ctx.restore();
 }
 function desenhar() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -519,7 +811,7 @@ function desenhar() {
   ctx.fillRect(0, canvas.height / 2 - 1, canvas.width, 2);
 
   desenharFaixa(280, 60, "#e6edf7");
-  desenharFaixa(100, 60, "#ffe08a");
+  desenharFaixa(100, 60, "#ffe08a", 95);
 
   desenharLoja();
   desenharOficina();
@@ -573,7 +865,9 @@ function colidiuComObstaculo() {
 }
 
 function atualizar() {
-  if (entregaConcluida || missaoFalhou) {
+  personagemAndando = false;
+
+  if (!jogoIniciado || partidaVencida || entregaConcluida || missaoFalhou) {
     return;
   }
 
@@ -631,6 +925,10 @@ function atualizar() {
 
   if (playerX !== oldX || playerY !== oldY) {
     passos = passos + 1;
+    personagemAndando = true;
+
+    const distancia = Math.hypot(playerX - oldX, playerY - oldY);
+    faseCaminhada = (faseCaminhada + distancia * 0.12) % (Math.PI * 2);
   }
 
   // Detecta quando o personagem se move contra um carro.
@@ -646,6 +944,7 @@ function atualizar() {
     playerY + playerSize <= retiradaY + retiradaTamanho
   ) {
     temEncomenda = true;
+    tocarSom("retirada");
   }
 
   if (
@@ -660,11 +959,15 @@ function atualizar() {
 
     saldo = saldo + pagamentoPorEntrega;
     entregasRealizadas = entregasRealizadas + 1;
+    tocarSom("entrega");
 
     if (recorde === null || passos < recorde) {
       recorde = passos;
       salvarRecorde();
     }
+  }
+  if (entregasRealizadas >= metaEntregas) {
+    mostrarVitoria();
   }
 }
 
