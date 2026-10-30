@@ -399,6 +399,9 @@ function atualizarPainel() {
   }
 
   painelMissao.style.borderLeftColor = cor;
+
+  document.getElementById("botaoProxima").disabled =
+    !entregaConcluida || partidaVencida;
 }
 let jogoIniciado = false;
 const teclas = {};
@@ -407,6 +410,8 @@ function limparTeclas() {
   for (const tecla in teclas) {
     teclas[tecla] = false;
   }
+
+  limparControlesToque();
 }
 botaoJogar.addEventListener("click", () => {
   abrirJogo();
@@ -894,16 +899,16 @@ function atualizar() {
   const oldY = playerY;
   let passo = playerSpeed;
 
-  if (teclas["Shift"] === true) {
+  if (teclaPressionada("Shift")) {
     passo = playerSpeed * 2;
   }
 
   const direcaoX =
-    Number(teclas["ArrowRight"] === true) -
-    Number(teclas["ArrowLeft"] === true);
+    Number(teclaPressionada("ArrowRight")) -
+    Number(teclaPressionada("ArrowLeft"));
 
   const direcaoY =
-    Number(teclas["ArrowDown"] === true) - Number(teclas["ArrowUp"] === true);
+    Number(teclaPressionada("ArrowDown")) - Number(teclaPressionada("ArrowUp"));
 
   if (direcaoX !== 0 && direcaoY !== 0) {
     passo = passo / Math.sqrt(2);
@@ -1045,3 +1050,98 @@ function animar(tempoAtual) {
 }
 
 requestAnimationFrame(animar);
+
+const comandosToque = new Map();
+const botoesToque = document.querySelectorAll("[data-tecla]");
+const botaoPausar = document.getElementById("botaoPausar");
+const botaoReiniciar = document.getElementById("botaoReiniciar");
+const botaoProxima = document.getElementById("botaoProxima");
+
+function teclaPressionada(tecla) {
+  return (
+    teclas[tecla] === true || Array.from(comandosToque.values()).includes(tecla)
+  );
+}
+
+function limparControlesToque() {
+  comandosToque.clear();
+
+  for (const botao of botoesToque) {
+    botao.classList.remove("pressionado");
+  }
+}
+
+for (const botao of botoesToque) {
+  botao.addEventListener("pointerdown", (evento) => {
+    if (
+      evento.button !== 0 ||
+      !jogoIniciado ||
+      entregaConcluida ||
+      missaoFalhou ||
+      partidaVencida
+    ) {
+      return;
+    }
+
+    evento.preventDefault();
+    prepararAudio();
+
+    botao.setPointerCapture(evento.pointerId);
+    comandosToque.set(evento.pointerId, botao.dataset.tecla);
+    botao.classList.add("pressionado");
+  });
+
+  function soltarBotao(evento) {
+    comandosToque.delete(evento.pointerId);
+
+    const aindaPressionado = Array.from(comandosToque.values()).includes(
+      botao.dataset.tecla,
+    );
+
+    botao.classList.toggle("pressionado", aindaPressionado);
+  }
+
+  botao.addEventListener("pointerup", soltarBotao);
+  botao.addEventListener("pointercancel", soltarBotao);
+  botao.addEventListener("lostpointercapture", soltarBotao);
+
+  botao.addEventListener("contextmenu", (evento) => {
+    evento.preventDefault();
+  });
+}
+
+botaoPausar.addEventListener("click", () => {
+  if (jogoIniciado) {
+    abrirMenu();
+  }
+});
+
+botaoReiniciar.addEventListener("click", () => {
+  if (!jogoIniciado || partidaVencida) {
+    return;
+  }
+
+  reiniciarMissao();
+  desenhar();
+  canvas.focus({ preventScroll: true });
+});
+
+botaoProxima.addEventListener("click", () => {
+  if (!jogoIniciado || !entregaConcluida || partidaVencida) {
+    return;
+  }
+
+  proximaMissao();
+  desenhar();
+  canvas.focus({ preventScroll: true });
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    limparTeclas();
+
+    if (jogoIniciado) {
+      abrirMenu();
+    }
+  }
+});

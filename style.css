@@ -361,3 +361,293 @@ body {
     font-size: 12px;
   }
 }
+
+#areaJogo {
+  grid-template-areas:
+    "painel"
+    "missao"
+    "acoes"
+    "mapa"
+    "rodape";
+}
+
+#areaJogo .painel {
+  grid-area: painel;
+}
+
+#painelMissao {
+  grid-area: missao;
+}
+
+.acoes-jogo {
+  grid-area: acoes;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#areaJogo .acoes-jogo button {
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid #00e5ff;
+  border-radius: 8px;
+  background: #10121f;
+  color: #00e5ff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#areaJogo .acoes-jogo button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+#areaJogo .acoes-jogo #botaoSom[aria-pressed="false"] {
+  border-color: #8892a6;
+  color: #b8c4d9;
+}
+
+#areaJogo #gameCanvas {
+  grid-area: mapa;
+}
+
+.rodape-jogo {
+  grid-area: rodape;
+  min-width: 0;
+}
+
+.controles-toque {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px;
+}
+
+.direcional {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+}
+
+.direcional .cima {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.direcional .esquerda {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.direcional .direita {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.direcional .baixo {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.controles-toque button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 2px solid #00e5ff;
+  border-radius: 12px;
+  background: #10121f;
+  color: #00e5ff;
+  font:
+    bold 18px Arial,
+    sans-serif;
+  cursor: pointer;
+
+  /* Permite segurar dois botões sem arrastar a página. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.controles-toque .botao-correr {
+  width: 76px;
+  height: 76px;
+  border-color: #ffd54a;
+  color: #ffd54a;
+  font-size: 15px;
+}
+
+.controles-toque button.pressionado {
+  background: #16465c;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+}
+
+.controles-toque .botao-correr.pressionado {
+  background: #51431b;
+}
+
+.acoes-jogo button:focus-visible,
+.controles-toque button:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+/* Exibe os controles em telas de toque ou janelas estreitas. */
+@media (any-pointer: coarse), (max-width: 900px) {
+  .controles-toque {
+    display: flex;
+  }
+
+  #areaJogo .controles {
+    display: none;
+  }
+}
+
+/* No celular deitado, os controles ficam ao lado do mapa. */
+@media (max-height: 500px) and (min-width: 600px) {
+  #areaJogo {
+    grid-template-columns: minmax(0, 1fr) 156px;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "painel rodape"
+      "missao rodape"
+      "acoes rodape"
+      "mapa rodape";
+    gap: 6px;
+  }
+
+  #areaJogo .painel {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  #areaJogo .painel div {
+    padding: 4px;
+  }
+
+  #areaJogo .painel span {
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+
+  #areaJogo .painel strong {
+    font-size: 11px;
+  }
+
+  #areaJogo #painelMissao {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .rodape-jogo {
+    align-self: center;
+  }
+
+  .controles-toque {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .controles-toque .botao-correr {
+    width: 100%;
+    height: 44px;
+  }
+
+  #areaJogo .controles {
+    display: none;
+  }
+}
+
+/* Menu centralizado e limitado à altura da janela */
+#telaInicial {
+  box-sizing: border-box;
+  width: min(800px, 100%);
+  max-width: 100%;
+  max-height: calc(100dvh - 24px);
+  min-height: 0;
+  padding: 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  overflow: hidden;
+}
+
+#telaInicial > * {
+  flex-shrink: 0;
+}
+
+#telaInicial h1 {
+  font-size: clamp(28px, 6vw, 42px);
+}
+
+#telaInicial p,
+#telaInicial #avisoPausa,
+#telaInicial .autoria {
+  margin: 0;
+}
+
+#telaInicial ul {
+  box-sizing: border-box;
+  align-self: stretch;
+  flex: 0 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 12px 16px 12px 32px;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #00e5ff #10121f;
+
+  border: 1px solid #283246;
+  border-radius: 8px;
+  background: #080b12;
+  text-align: left;
+  line-height: 1.6;
+}
+
+#telaInicial li + li {
+  margin-top: 6px;
+}
+
+#telaInicial #botaoJogar,
+#telaInicial #botaoNovaPartida {
+  width: min(280px, 100%);
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 20px;
+}
+
+#telaInicial .autoria {
+  font-size: 12px;
+}
+
+/* Menu mais compacto em celulares e janelas baixas */
+@media (max-width: 600px), (max-height: 600px) {
+  #telaInicial {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  #telaInicial h1 {
+    font-size: 28px;
+  }
+
+  #telaInicial p,
+  #telaInicial ul {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  #telaInicial .autoria {
+    font-size: 11px;
+  }
+}

@@ -46,6 +46,10 @@
           até o limite do nível 6.
         </li>
         <li>Complete 10 entregas para vencer a partida.</li>
+        <li>
+          No celular, segure as setas da tela para mover. Segure também Correr
+          para acelerar. Use os botões para pausar, reiniciar e avançar.
+        </li>
       </ul>
 
       <button id="botaoJogar" type="button">Jogar</button>
@@ -93,9 +97,14 @@
       </header>
 
       <p id="painelMissao" role="status"></p>
-      <button id="botaoSom" type="button" aria-pressed="true">
-        Som: ligado
-      </button>
+      <div class="acoes-jogo" role="group" aria-label="Ações da partida">
+        <button id="botaoSom" type="button" aria-pressed="true">
+          Som: ligado
+        </button>
+        <button id="botaoPausar" type="button">Pausar</button>
+        <button id="botaoReiniciar" type="button">Reiniciar missão</button>
+        <button id="botaoProxima" type="button">Próxima entrega</button>
+      </div>
 
       <canvas
         id="gameCanvas"
@@ -105,10 +114,64 @@
         aria-label="Mapa do jogo. Use as setas para mover e Escape para abrir o menu."
       ></canvas>
 
-      <p class="controles">
-        Setas: mover · Shift: correr · R: repetir missão · N: próxima entrega ·
-        Esc: menu
-      </p>
+      <footer class="rodape-jogo">
+        <div
+          class="controles-toque"
+          role="group"
+          aria-label="Controles de movimento"
+        >
+          <div class="direcional">
+            <button
+              type="button"
+              class="cima"
+              data-tecla="ArrowUp"
+              aria-label="Mover para cima"
+            >
+              ▲
+            </button>
+
+            <button
+              type="button"
+              class="esquerda"
+              data-tecla="ArrowLeft"
+              aria-label="Mover para a esquerda"
+            >
+              ◀
+            </button>
+
+            <button
+              type="button"
+              class="baixo"
+              data-tecla="ArrowDown"
+              aria-label="Mover para baixo"
+            >
+              ▼
+            </button>
+
+            <button
+              type="button"
+              class="direita"
+              data-tecla="ArrowRight"
+              aria-label="Mover para a direita"
+            >
+              ▶
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="botao-correr"
+            data-tecla="Shift"
+            aria-label="Segure para correr"
+          >
+            Correr
+          </button>
+        </div>
+
+        <p class="controles">
+          Teclado: setas · Shift: correr · R: repetir · N: próxima · Esc: menu
+        </p>
+      </footer>
     </section>
 
     <section id="telaVitoria" hidden aria-labelledby="tituloVitoria">
