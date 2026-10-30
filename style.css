@@ -651,3 +651,60 @@ body {
     font-size: 11px;
   }
 }
+
+#barraTempo {
+  display: block;
+  width: 100%;
+  height: 6px;
+  margin-top: 6px;
+  border: none;
+  border-radius: 999px;
+  overflow: hidden;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #283246;
+  accent-color: #00e5ff;
+}
+
+#barraTempo::-webkit-progress-bar {
+  background: #283246;
+  border-radius: 999px;
+}
+
+#barraTempo::-webkit-progress-value {
+  background: #00e5ff;
+  border-radius: 999px;
+}
+
+#barraTempo::-moz-progress-bar {
+  background: #00e5ff;
+  border-radius: 999px;
+}
+
+#barraTempo.tempo-critico {
+  accent-color: #ff6b81;
+}
+
+#barraTempo.tempo-critico::-webkit-progress-value {
+  background: #ff6b81;
+}
+
+#barraTempo.tempo-critico::-moz-progress-bar {
+  background: #ff6b81;
+}
+
+#areaJogo .painel > div {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#areaJogo #barraTempo {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 6px;
+  margin: 6px 0 0;
+}

@@ -365,6 +365,15 @@ function atualizarPainel() {
   painelRecorde.textContent = recorde === null ? "—" : recorde;
 
   painelTempo.textContent = Math.ceil(tempoRestante) + " s";
+  const barraTempo = document.getElementById("barraTempo");
+
+  barraTempo.max = duracaoMissao;
+  barraTempo.value = tempoRestante;
+  barraTempo.classList.toggle("tempo-critico", tempoRestante <= 10);
+  barraTempo.setAttribute(
+    "aria-valuetext",
+    Math.ceil(tempoRestante) + " segundos restantes",
+  );
   painelTempo.style.color = tempoRestante <= 10 ? "#ff6b81" : "#00e5ff";
 
   let mensagem;
